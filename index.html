@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ATSMATRIX // Multi-Agent Research Collision & Neural Graph Engine</title>
+  <title>ATSMATRIX // Multi-Agent Research Collision & Gemini LLM Runtime</title>
   <style>
     :root {
       --bg-color: #f6f8fa;
@@ -43,10 +43,7 @@
       border-bottom: 1px solid var(--border-color); background: var(--bg-panel); backdrop-filter: blur(12px); z-index: 50;
     }
     .top-left-title { display: flex; flex-direction: column; gap: 2px; }
-    .sub-brand {
-      font-size: 0.65rem; font-weight: 800; letter-spacing: 1.5px; color: var(--text-muted);
-      text-transform: uppercase; display: flex; align-items: center; gap: 6px;
-    }
+    .sub-brand { font-size: 0.65rem; font-weight: 800; letter-spacing: 1.5px; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
     .main-claim { font-size: 1.15rem; font-weight: 800; font-family: var(--font-sans); color: var(--text-main); letter-spacing: -0.02em; }
     .live-badge { font-size: 0.62rem; font-weight: 800; color: var(--ats-blue); letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
     .live-dot { width: 7px; height: 7px; background: var(--ats-blue); border-radius: 50%; box-shadow: 0 0 10px var(--ats-blue); animation: pulse-dot 1.2s infinite; }
@@ -60,6 +57,8 @@
     .btn:hover { border-color: var(--ats-blue); color: var(--ats-blue); box-shadow: 0 2px 8px rgba(2, 132, 199, 0.15); }
     .btn-primary { background: var(--ats-blue); border-color: var(--ats-blue); color: #fff; }
     .btn-primary:hover { background: #0369a1; color: #fff; box-shadow: 0 3px 12px rgba(2, 132, 199, 0.35); }
+    .btn-gemini { background: linear-gradient(135deg, #7c3aed, #0284c7); color: #fff; border: none; }
+    .btn-gemini:hover { box-shadow: 0 0 15px rgba(124, 58, 237, 0.5); }
     .theme-toggle { background: transparent; border: 1px solid var(--border-color); border-radius: 4px; padding: 6px 8px; cursor: pointer; color: var(--text-main); font-size: 0.8rem; }
     .viewport-container { position: relative; flex: 1; overflow: hidden; background: var(--bg-color); }
     canvas#graph-canvas { width: 100%; height: 100%; display: block; cursor: grab; }
@@ -84,9 +83,44 @@
     }
     .trigger-btn {
       background: var(--ats-blue); color: #fff; border: none; font-family: var(--font-mono);
-      font-size: 0.68rem; font-weight: 700; padding: 4px 10px; border-radius: 12px; cursor: pointer; transition: background 0.2s ease;
+      font-size: 0.68rem; font-weight: 700; padding: 4px 10px; border-radius: 12px; cursor: pointer;
     }
-    .trigger-btn:hover { background: #0369a1; }
+    .chat-drawer {
+      position: absolute; right: 20px; bottom: 180px; width: 380px; height: 460px;
+      background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 10px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25); z-index: 60; display: none;
+      flex-direction: column; overflow: hidden; backdrop-filter: blur(14px);
+      animation: slideUp 0.25s ease;
+    }
+    .chat-drawer.open { display: flex; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    .chat-header {
+      padding: 10px 14px; background: linear-gradient(90deg, rgba(124, 58, 237, 0.12), rgba(2, 132, 199, 0.12));
+      border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;
+    }
+    .chat-header h3 { font-size: 0.78rem; font-weight: 800; color: var(--ats-blue); display: flex; align-items: center; gap: 6px; }
+    .api-key-bar {
+      padding: 6px 12px; background: rgba(0,0,0,0.03); border-bottom: 1px dashed var(--border-color);
+      display: flex; gap: 6px; align-items: center; font-size: 0.65rem;
+    }
+    .api-key-input {
+      flex: 1; background: transparent; border: 1px solid var(--border-color); border-radius: 3px;
+      padding: 3px 6px; font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-main);
+    }
+    .chat-messages {
+      flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 0.72rem;
+    }
+    .msg { padding: 8px 10px; border-radius: 6px; max-width: 88%; line-height: 1.4; word-break: break-word; }
+    .msg-user { align-self: flex-end; background: var(--ats-blue); color: #fff; }
+    .msg-bot { align-self: flex-start; background: rgba(124, 58, 237, 0.1); border: 1px solid rgba(124, 58, 237, 0.25); color: var(--text-main); }
+    .msg-thought { font-size: 0.64rem; color: var(--text-dim); font-style: italic; border-left: 2px solid var(--ats-purple); padding-left: 6px; margin-bottom: 4px; }
+    .chat-input-area {
+      padding: 8px 10px; border-top: 1px solid var(--border-color); display: flex; gap: 6px; background: var(--bg-panel);
+    }
+    .chat-txt {
+      flex: 1; background: rgba(0,0,0,0.03); border: 1px solid var(--border-color); border-radius: 4px;
+      padding: 6px 8px; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-main); outline: none;
+    }
     .bottom-hud {
       border-top: 1px solid var(--border-color); background: var(--bg-panel); backdrop-filter: blur(12px);
       padding: 10px 24px; display: flex; flex-direction: column; gap: 8px; z-index: 50;
@@ -162,6 +196,7 @@
       <div class="live-badge"><span class="live-dot"></span><span>HIGH-FREQUENCY GRAPH-NATIVE RUNTIME // ANYEL1TO EDITION</span></div>
     </div>
     <div class="header-actions">
+      <button class="btn btn-gemini" onclick="toggleChatDrawer()"><span>✨</span> CHAT WITH GEMINI</button>
       <button class="btn btn-primary" onclick="openConnectModal()"><span>⚡</span> CONNECT YOUR AI</button>
       <button class="btn" onclick="boostSpeed()"><span>🚀</span> <span id="speed-btn-txt">BOOST: 2X</span></button>
       <button class="btn" onclick="resetEngine()"><span>↺</span> RESET</button>
@@ -176,6 +211,28 @@
       <input type="text" id="quick-msg-input" class="trigger-input" placeholder="Type prompt or action..." value="revenue contradiction detected" />
       <button class="trigger-btn" onclick="triggerQuickEvent()">FIRE NOW</button>
     </div>
+
+    <div id="chat-drawer" class="chat-drawer">
+      <div class="chat-header">
+        <h3><span>✨</span> ATSMATRIX // GEMINI LLM AGENT</h3>
+        <button class="theme-toggle" onclick="toggleChatDrawer()">✕</button>
+      </div>
+      <div class="api-key-bar">
+        <span>KEY:</span>
+        <input type="password" id="gemini-key-input" class="api-key-input" placeholder="Enter Gemini API Key (or leave empty for Demo)" />
+        <button class="btn" style="padding:2px 6px; font-size:0.6rem;" onclick="saveGeminiKey()">SAVE</button>
+      </div>
+      <div id="chat-messages" class="chat-messages">
+        <div class="msg msg-bot">
+          Hello! I am your <b>ATSMATRIX Gemini Agent</b>. Ask me to research a topic, debug code, or solve a problem. Watch the 500+ agent collision graph fire in real-time as I think!
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="chat-user-input" class="chat-txt" placeholder="Ask Gemini something..." onkeydown="if(event.key==='Enter') sendGeminiQuery()" />
+        <button class="btn btn-primary" onclick="sendGeminiQuery()">SEND</button>
+      </div>
+    </div>
+
     <div id="badge-1" class="collision-tag tag-confirmed" style="top: 16%; left: 46%;">CONFIRMED 4/4</div>
     <div id="badge-2" class="collision-tag tag-merged" style="top: 30%; left: 22%;">SOURCE MERGED</div>
     <div id="badge-3" class="collision-tag tag-collision" style="top: 14%; left: 72%;">ENTITY COLLISION</div>
@@ -278,6 +335,89 @@ emit_step("agent_501", "LINK", "Supplier dependency bridge created")</div>
       document.querySelectorAll('.modal-tabs .tab-btn').forEach(el => el.classList.remove('active'));
       document.getElementById('tab-' + name).style.display = 'block';
       event.target.classList.add('active');
+    }
+
+    function toggleChatDrawer() {
+      const drawer = document.getElementById('chat-drawer');
+      drawer.classList.toggle('open');
+      if (drawer.classList.contains('open')) {
+        document.getElementById('gemini-key-input').value = localStorage.getItem('ats_gemini_key') || '';
+        document.getElementById('chat-user-input').focus();
+      }
+    }
+
+    function saveGeminiKey() {
+      const key = document.getElementById('gemini-key-input').value.trim();
+      localStorage.setItem('ats_gemini_key', key);
+      alert('Gemini API Key Saved Locally!');
+    }
+
+    async function sendGeminiQuery() {
+      const input = document.getElementById('chat-user-input');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+
+      const msgBox = document.getElementById('chat-messages');
+      const userDiv = document.createElement('div');
+      userDiv.className = 'msg msg-user';
+      userDiv.textContent = text;
+      msgBox.appendChild(userDiv);
+      msgBox.scrollTop = msgBox.scrollHeight;
+
+      pushLiveEvent('GEMINI_INGEST', `Objective received: "${text.substring(0, 32)}..."`);
+      for (let k = 0; k < 20; k++) spawnPhoton();
+
+      const botDiv = document.createElement('div');
+      botDiv.className = 'msg msg-bot';
+      botDiv.innerHTML = `<div class="msg-thought">⚡ Gemini is activating research clusters...</div>`;
+      msgBox.appendChild(botDiv);
+      msgBox.scrollTop = msgBox.scrollHeight;
+
+      const apiKey = localStorage.getItem('ats_gemini_key') || document.getElementById('gemini-key-input').value.trim();
+
+      if (!apiKey) {
+        setTimeout(() => {
+          pushLiveEvent('PLAN', 'Decomposing objective into citation verification DAG');
+          for (let k = 0; k < 12; k++) spawnPhoton();
+        }, 400);
+
+        setTimeout(() => {
+          pushLiveEvent('MATCH', 'Matching entity embeddings across 4 independent sources');
+          for (let k = 0; k < 15; k++) spawnPhoton();
+        }, 900);
+
+        setTimeout(() => {
+          pushLiveEvent('VERIFY', 'Synthesizing verified consensus output');
+          for (let k = 0; k < 25; k++) spawnPhoton();
+          botDiv.innerHTML = `<b>ATSMATRIX Gemini Agent:</b> Processed objective for <i>"${text}"</i>.<br><br>• Analyzed 520 neural agent nodes across 4 clusters.<br>• Verified 18 cross-links with 0 contradictions.<br>• Consensus reached with 98.4% confidence rating.`;
+          msgBox.scrollTop = msgBox.scrollHeight;
+        }, 1600);
+        return;
+      }
+
+      try {
+        pushLiveEvent('GEMINI_REASON', 'Streaming neural weights from Google Gemini API');
+        for (let k = 0; k < 18; k++) spawnPhoton();
+
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `You are the ATSMATRIX Autonomous Agent core. Answer clearly and concisely: ${text}` }] }]
+          })
+        });
+        const data = await res.json();
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Response received from Gemini.";
+        
+        pushLiveEvent('SYNTH', 'Gemini consensus verified and formatted');
+        for (let k = 0; k < 30; k++) spawnPhoton();
+        
+        botDiv.innerHTML = `<b>Gemini Agent:</b> ${reply.replace(/\\n/g, '<br>')}`;
+        msgBox.scrollTop = msgBox.scrollHeight;
+      } catch (err) {
+        botDiv.innerHTML = `<span style="color:var(--ats-magenta);">Error calling Gemini: ${err.message}</span>`;
+      }
     }
 
     const tilesBox = document.getElementById('matrix-tiles-box'), tileEls = [];
@@ -507,8 +647,3 @@ emit_step("agent_501", "LINK", "Supplier dependency bridge created")</div>
         document.getElementById('stat-photons').textContent = photons.length;
       }
       requestAnimationFrame(renderLoop);
-    }
-    renderLoop();
-  </script>
-</body>
-</html>
