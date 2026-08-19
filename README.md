@@ -1,15 +1,65 @@
-import requests
+# ◈ ATSMATRIX // Multi-Agent Research Collision & Neural Graph Engine
 
-ATSMATRIX_ENDPOINT = "http://localhost:8080/api/agent/event"
+[![Live Website](https://img.shields.io/badge/Live%20Demo-anyel1to.github.io-0284c7?style=for-the-badge&logo=google-chrome&logoColor=white)](https://anyel1to.github.io/atsmatrix-agent-visualizeR--ANYEL1TO/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-38bdf8.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![Engine: 60--120 FPS](https://img.shields.io/badge/Render%20Engine-60--120%20FPS-10b981?style=for-the-badge)](https://anyel1to.github.io/atsmatrix-agent-visualizeR--ANYEL1TO/)
+[![Throughput](https://img.shields.io/badge/Throughput-2%2C450%2B%20msg%2Fs-7c3aed?style=for-the-badge)](https://anyel1to.github.io/atsmatrix-agent-visualizeR--ANYEL1TO/)
+[![LLM: Google Gemini](https://img.shields.io/badge/AI%20Core-Google%20Gemini-e11d48?style=for-the-badge&logo=google)](https://anyel1to.github.io/atsmatrix-agent-visualizeR--ANYEL1TO/)
 
-def emit_step(agent_id: str, action: str, message: str, cluster: str = "VERIFY"):
-    requests.post(ATSMATRIX_ENDPOINT, json={
-        "agent_id": agent_id,
-        "action": action,       # LINK, VERIFY, MATCH, FLAG, SYNC, FOUND
-        "cluster": cluster,     # COLLECT, MATCH, CROSS-LINK, VERIFY, SYNTH
-        "message": message
-    })
+> **500+ agents. Sources collide. Truth survives.**  
+> An ultra-high-throughput, graph-native multi-agent visualizer and telemetry engine designed by **ATSMATRIX Technologies**. Connect autonomous AI agents (LangGraph, CrewAI, AutoGen, or custom LLMs) and monitor reasoning, citation verification, and memory sync in real time.
 
-# Example inside a LangGraph / CrewAI node:
-emit_step("agent_501", "VERIFY", "Cross-verified citation tree with cluster #2", cluster="VERIFY")
-emit_step("agent_501", "LINK", "Supplier dependency bridge created", cluster="CROSS-LINK")
+---
+
+## 🌐 Live Web App
+Experience the live engine in your browser:  
+👉 **[https://anyel1to.github.io/atsmatrix-agent-visualizeR--ANYEL1TO/](https://anyel1to.github.io/atsmatrix-agent-visualizeR--ANYEL1TO/)**
+
+---
+
+## 📑 Table of Contents
+1. [Core Features](#-core-features)
+2. [Architecture Overview](#-architecture-overview)
+3. [User Tutorial (Web Interface)](#-user-tutorial-web-interface)
+4. [Developer Integration Tutorial](#-developer-integration-tutorial)
+   - [Python (LangGraph & Custom Agents)](#1-python-langgraph--custom-agents)
+   - [CrewAI Multi-Agent Swarms](#2-crewai-multi-agent-swarms)
+   - [cURL & REST Webhooks](#3-curl--rest-webhook)
+   - [JavaScript / TypeScript (Node.js & Web)](#4-javascript--typescript)
+5. [Event Payload Specification](#-event-payload-specification)
+6. [Local Installation & Desktop Build](#-local-installation--desktop-build)
+7. [License & Credits](#-license--credits)
+
+---
+
+## ✨ Core Features
+
+- **520+ Active Agents & 180+ Moving Photons**: Real-time canvas physics with continuous data packet flows traveling along cross-cluster bridges.
+- **Google Gemini LLM Integration**: Built-in interactive AI chat assistant that streams live Chain-of-Thought reasoning directly into the collision network.
+- **5-Phase Pipeline HUD**: Real-time status tracking for `COLLECT` → `MATCH` → `CROSS-LINK` → `VERIFY` → `SYNTH`.
+- **Evidence Wall Matrix**: 112 reactive status tiles tracking memory commitments, source verification, and counterparty overlaps.
+- **Interactive Physics Engine**: Drag, drop, and rearrange agent clusters on the fly with orbital momentum and spring tension.
+- **Dark / Light Cyber Aesthetics**: High-contrast research view with instant theme toggle (`🌓`).
+- **Zero-Dependency Deployment**: Single-file architecture ready to run on GitHub Pages, Netlify, Vercel, or local browser.
+
+---
+
+## 🏗️ Architecture Overview
+
+The **ATSMATRIX Collision Engine** structures multi-agent swarms into 4 specialized clusters:
+
+```mermaid
+graph TD
+    USER([User Objective / Query]) --> C1[1. DISCOVERY_HUB (Cyan)]
+    C1 --> C2[2. REASONING_ENGINE (Purple)]
+    C2 --> C3[3. VERIFICATION_CORE (Magenta)]
+    C3 -- Anomaly / Contradiction --> C2
+    C3 -- Verified --> C4[4. SYNTHESIS_BROKER (Blue)]
+    C4 --> DELIVERABLE([Consensus Truth Delivered])
+
+    style USER fill:#0f172a,stroke:#0284c7,stroke-width:2px,color:#fff
+    style C1 fill:#082f49,stroke:#06b6d4,stroke-width:2px,color:#fff
+    style C2 fill:#3b0764,stroke:#a855f7,stroke-width:2px,color:#fff
+    style C3 fill:#4c0519,stroke:#f43f5e,stroke-width:2px,color:#fff
+    style C4 fill:#0c4a6e,stroke:#38bdf8,stroke-width:2px,color:#fff
+    style DELIVERABLE fill:#052e16,stroke:#22c55e,stroke-width:2px,color:#fff
