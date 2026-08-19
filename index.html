@@ -1,65 +1,688 @@
-# ◈ ATSMATRIX // Multi-Agent Research Collision & Neural Graph Engine
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ATSMATRIX // Multi-Agent Research Collision & Gemini LLM Runtime</title>
+  <style>
+    :root {
+      --bg-color: #f6f8fa;
+      --bg-panel: rgba(255, 255, 255, 0.96);
+      --border-color: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --ats-blue: #0284c7;
+      --ats-magenta: #e11d48;
+      --ats-purple: #7c3aed;
+      --ats-cyan: #06b6d4;
+      --ats-amber: #f59e0b;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
 
-[![Live Website](https://img.shields.io/badge/Live%20Demo-anyel1to.github.io-0284c7?style=for-the-badge&logo=google-chrome&logoColor=white)](https://anyel1to.github.io/atsmatrix-agent-visualizeR--ANYEL1TO/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-38bdf8.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
-[![Engine: 60--120 FPS](https://img.shields.io/badge/Render%20Engine-60--120%20FPS-10b981?style=for-the-badge)](https://anyel1to.github.io/atsmatrix-agent-visualizeR--ANYEL1TO/)
-[![Throughput](https://img.shields.io/badge/Throughput-2%2C450%2B%20msg%2Fs-7c3aed?style=for-the-badge)](https://anyel1to.github.io/atsmatrix-agent-visualizeR--ANYEL1TO/)
-[![LLM: Google Gemini](https://img.shields.io/badge/AI%20Core-Google%20Gemini-e11d48?style=for-the-badge&logo=google)](https://anyel1to.github.io/atsmatrix-agent-visualizeR--ANYEL1TO/)
+    [data-theme="dark"] {
+      --bg-color: #030712;
+      --bg-panel: rgba(15, 23, 42, 0.94);
+      --border-color: rgba(51, 65, 85, 0.7);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --ats-blue: #38bdf8;
+      --ats-magenta: #f43f5e;
+      --ats-purple: #a855f7;
+      --ats-cyan: #22d3ee;
+      --ats-amber: #fbbf24;
+    }
 
-> **500+ agents. Sources collide. Truth survives.**  
-> An ultra-high-throughput, graph-native multi-agent visualizer and telemetry engine designed by **ATSMATRIX Technologies**. Connect autonomous AI agents (LangGraph, CrewAI, AutoGen, or custom LLMs) and monitor reasoning, citation verification, and memory sync in real time.
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
----
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      min-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
 
-## 🌐 Live Web App
-Experience the live engine in your browser:  
-👉 **[https://anyel1to.github.io/atsmatrix-agent-visualizeR--ANYEL1TO/](https://anyel1to.github.io/atsmatrix-agent-visualizeR--ANYEL1TO/)**
+    header {
+      padding: 10px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-panel);
+      backdrop-filter: blur(12px);
+      z-index: 50;
+    }
 
----
+    .top-left-title { display: flex; flex-direction: column; gap: 2px; }
+    .sub-brand {
+      font-size: 0.65rem; font-weight: 800; letter-spacing: 1.5px; color: var(--text-muted);
+      text-transform: uppercase; display: flex; align-items: center; gap: 6px;
+    }
+    .main-claim { font-size: 1.15rem; font-weight: 800; font-family: var(--font-sans); color: var(--text-main); letter-spacing: -0.02em; }
+    .live-badge { font-size: 0.62rem; font-weight: 800; color: var(--ats-blue); letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
+    .live-dot { width: 7px; height: 7px; background: var(--ats-blue); border-radius: 50%; box-shadow: 0 0 10px var(--ats-blue); animation: pulse-dot 1.2s infinite; }
+    @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.4); } }
 
-## 📑 Table of Contents
-1. [Core Features](#-core-features)
-2. [Architecture Overview](#-architecture-overview)
-3. [User Tutorial (Web Interface)](#-user-tutorial-web-interface)
-4. [Developer Integration Tutorial](#-developer-integration-tutorial)
-   - [Python (LangGraph & Custom Agents)](#1-python-langgraph--custom-agents)
-   - [CrewAI Multi-Agent Swarms](#2-crewai-multi-agent-swarms)
-   - [cURL & REST Webhooks](#3-curl--rest-webhook)
-   - [JavaScript / TypeScript (Node.js & Web)](#4-javascript--typescript)
-5. [Event Payload Specification](#-event-payload-specification)
-6. [Local Installation & Desktop Build](#-local-installation--desktop-build)
-7. [License & Credits](#-license--credits)
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .btn {
+      font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; padding: 6px 12px;
+      border-radius: 4px; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-panel);
+      color: var(--text-main); display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;
+    }
+    .btn:hover { border-color: var(--ats-blue); color: var(--ats-blue); box-shadow: 0 2px 8px rgba(2, 132, 199, 0.15); }
+    .btn-primary { background: var(--ats-blue); border-color: var(--ats-blue); color: #fff; }
+    .btn-primary:hover { background: #0369a1; color: #fff; box-shadow: 0 3px 12px rgba(2, 132, 199, 0.35); }
+    .btn-gemini { background: linear-gradient(135deg, #7c3aed, #0284c7); color: #fff; border: none; }
+    .btn-gemini:hover { box-shadow: 0 0 15px rgba(124, 58, 237, 0.5); }
+    .theme-toggle { background: transparent; border: 1px solid var(--border-color); border-radius: 4px; padding: 6px 8px; cursor: pointer; color: var(--text-main); font-size: 0.8rem; }
 
----
+    .viewport-container { position: relative; flex: 1; overflow: hidden; background: var(--bg-color); }
+    canvas#graph-canvas { width: 100%; height: 100%; display: block; cursor: grab; }
+    canvas#graph-canvas:active { cursor: grabbing; }
 
-## ✨ Core Features
+    .collision-tag {
+      position: absolute; background: var(--bg-panel); border: 1px solid var(--border-color);
+      border-radius: 3px; padding: 3px 8px; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.5px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1); pointer-events: none; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .tag-confirmed { border-color: var(--ats-magenta); color: var(--ats-magenta); }
+    .tag-merged { border-color: var(--ats-purple); color: var(--ats-purple); }
+    .tag-collision { border-color: var(--ats-cyan); color: var(--ats-cyan); }
+    .tag-verified { border-color: var(--ats-blue); color: var(--ats-blue); }
 
-- **520+ Active Agents & 180+ Moving Photons**: Real-time canvas physics with continuous data packet flows traveling along cross-cluster bridges.
-- **Google Gemini LLM Integration**: Built-in interactive AI chat assistant that streams live Chain-of-Thought reasoning directly into the collision network.
-- **5-Phase Pipeline HUD**: Real-time status tracking for `COLLECT` → `MATCH` → `CROSS-LINK` → `VERIFY` → `SYNTH`.
-- **Evidence Wall Matrix**: 112 reactive status tiles tracking memory commitments, source verification, and counterparty overlaps.
-- **Interactive Physics Engine**: Drag, drop, and rearrange agent clusters on the fly with orbital momentum and spring tension.
-- **Dark / Light Cyber Aesthetics**: High-contrast research view with instant theme toggle (`🌓`).
-- **Zero-Dependency Deployment**: Single-file architecture ready to run on GitHub Pages, Netlify, Vercel, or local browser.
+    .live-trigger-bar {
+      position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+      background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 20px;
+      padding: 4px 12px; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); z-index: 40;
+    }
+    .trigger-input {
+      background: transparent; border: none; outline: none; font-family: var(--font-mono);
+      font-size: 0.72rem; color: var(--text-main); width: 240px;
+    }
+    .trigger-btn {
+      background: var(--ats-blue); color: #fff; border: none; font-family: var(--font-mono);
+      font-size: 0.68rem; font-weight: 700; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+    }
 
----
+    .chat-drawer {
+      position: absolute; right: 20px; bottom: 180px; width: 380px; height: 460px;
+      background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 10px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25); z-index: 60; display: none;
+      flex-direction: column; overflow: hidden; backdrop-filter: blur(14px);
+      animation: slideUp 0.25s ease;
+    }
+    .chat-drawer.open { display: flex; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-## 🏗️ Architecture Overview
+    .chat-header {
+      padding: 10px 14px; background: linear-gradient(90deg, rgba(124, 58, 237, 0.12), rgba(2, 132, 199, 0.12));
+      border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;
+    }
+    .chat-header h3 { font-size: 0.78rem; font-weight: 800; color: var(--ats-blue); display: flex; align-items: center; gap: 6px; }
 
-The **ATSMATRIX Collision Engine** structures multi-agent swarms into 4 specialized clusters:
+    .api-key-bar {
+      padding: 6px 12px; background: rgba(0,0,0,0.03); border-bottom: 1px dashed var(--border-color);
+      display: flex; gap: 6px; align-items: center; font-size: 0.65rem;
+    }
+    .api-key-input {
+      flex: 1; background: transparent; border: 1px solid var(--border-color); border-radius: 3px;
+      padding: 3px 6px; font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-main);
+    }
 
-```mermaid
-graph TD
-    USER["User Objective / Query"] --> C1["1. DISCOVERY_HUB (Cyan)"]
-    C1 --> C2["2. REASONING_ENGINE (Purple)"]
-    C2 --> C3["3. VERIFICATION_CORE (Magenta)"]
-    C3 -->|Anomaly Detected| C2
-    C3 -->|Verified| C4["4. SYNTHESIS_BROKER (Blue)"]
-    C4 --> DELIVERABLE["Consensus Truth Delivered"]
+    .chat-messages {
+      flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 0.72rem;
+    }
+    .msg { padding: 8px 10px; border-radius: 6px; max-width: 88%; line-height: 1.4; word-break: break-word; }
+    .msg-user { align-self: flex-end; background: var(--ats-blue); color: #fff; }
+    .msg-bot { align-self: flex-start; background: rgba(124, 58, 237, 0.1); border: 1px solid rgba(124, 58, 237, 0.25); color: var(--text-main); }
+    .msg-thought { font-size: 0.64rem; color: var(--text-dim); font-style: italic; border-left: 2px solid var(--ats-purple); padding-left: 6px; margin-bottom: 4px; }
 
-    style USER fill:#0f172a,stroke:#0284c7,stroke-width:2px,color:#fff
-    style C1 fill:#082f49,stroke:#06b6d4,stroke-width:2px,color:#fff
-    style C2 fill:#3b0764,stroke:#a855f7,stroke-width:2px,color:#fff
-    style C3 fill:#4c0519,stroke:#f43f5e,stroke-width:2px,color:#fff
-    style C4 fill:#0c4a6e,stroke:#38bdf8,stroke-width:2px,color:#fff
-    style DELIVERABLE fill:#052e16,stroke:#22c55e,stroke-width:2px,color:#fff
+    .chat-input-area {
+      padding: 8px 10px; border-top: 1px solid var(--border-color); display: flex; gap: 6px; background: var(--bg-panel);
+    }
+    .chat-txt {
+      flex: 1; background: rgba(0,0,0,0.03); border: 1px solid var(--border-color); border-radius: 4px;
+      padding: 6px 8px; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-main); outline: none;
+    }
+
+    .bottom-hud {
+      border-top: 1px solid var(--border-color); background: var(--bg-panel); backdrop-filter: blur(12px);
+      padding: 10px 24px; display: flex; flex-direction: column; gap: 8px; z-index: 50;
+    }
+    .pipeline-row { display: flex; align-items: center; gap: 14px; border-bottom: 1px dashed var(--border-color); padding-bottom: 6px; }
+    .pipeline-label { font-size: 0.6rem; font-weight: 800; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+    .pipeline-steps { display: flex; flex: 1; gap: 10px; }
+    .step-box {
+      flex: 1; border: 1px solid var(--border-color); border-radius: 3px; padding: 3px 6px;
+      display: flex; flex-direction: column; gap: 1px; position: relative; background: rgba(255, 255, 255, 0.02);
+    }
+    .step-box.active { border-color: var(--ats-blue); box-shadow: 0 0 12px rgba(2, 132, 199, 0.2); }
+    .step-num { font-size: 0.55rem; color: var(--text-dim); font-weight: 700; }
+    .step-name { font-size: 0.68rem; font-weight: 800; color: var(--text-main); }
+    .step-indicator { position: absolute; top: 0; right: 0; width: 4px; height: 100%; background: transparent; border-radius: 0 3px 3px 0; }
+    .step-box.active .step-indicator { background: var(--ats-blue); }
+
+    .hud-grid { display: grid; grid-template-columns: 1.3fr 1fr 1.3fr; gap: 18px; align-items: center; }
+    .activity-stream-wrap { display: flex; flex-direction: column; gap: 3px; }
+    .stream-header { font-size: 0.62rem; font-weight: 800; color: var(--text-muted); letter-spacing: 1px; display: flex; justify-content: space-between; }
+    .stream-feed { height: 84px; overflow-y: hidden; display: flex; flex-direction: column; gap: 2px; font-size: 0.65rem; }
+    .stream-row { display: flex; gap: 6px; line-height: 1.25; white-space: nowrap; animation: feedIn 0.1s ease; }
+    @keyframes feedIn { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; } }
+    .stream-time { color: var(--text-dim); font-size: 0.6rem; }
+    .stream-tag { font-weight: 800; padding: 0 3px; border-radius: 2px; font-size: 0.58rem; }
+    .tag-link { background: rgba(2, 132, 199, 0.15); color: var(--ats-blue); }
+    .tag-verify { background: rgba(225, 29, 72, 0.15); color: var(--ats-magenta); }
+    .tag-match { background: rgba(124, 58, 237, 0.15); color: var(--ats-purple); }
+    .tag-flag { background: rgba(245, 158, 11, 0.15); color: var(--ats-amber); }
+    .tag-sync { background: rgba(6, 182, 212, 0.15); color: var(--ats-cyan); }
+    .stream-msg { color: var(--text-main); font-weight: 600; }
+
+    .stats-table { display: flex; justify-content: space-around; border: 1px solid var(--border-color); border-radius: 4px; padding: 6px; }
+    .stat-unit { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+    .stat-val { font-size: 1.05rem; font-weight: 800; color: var(--text-main); }
+    .stat-title { font-size: 0.55rem; font-weight: 700; color: var(--text-dim); letter-spacing: 0.5px; }
+
+    .matrix-wall-wrap { display: flex; flex-direction: column; gap: 3px; }
+    .matrix-wall-header { font-size: 0.6rem; font-weight: 800; color: var(--text-muted); letter-spacing: 1px; }
+    .matrix-tiles { display: grid; grid-template-columns: repeat(28, 1fr); gap: 2px; height: 52px; }
+    .matrix-tile { background: rgba(2, 132, 199, 0.1); border-radius: 1px; transition: background 0.15s ease; }
+    .matrix-tile.active-pink { background: var(--ats-magenta); box-shadow: 0 0 6px var(--ats-magenta); }
+    .matrix-tile.active-blue { background: var(--ats-blue); box-shadow: 0 0 6px var(--ats-blue); }
+    .matrix-tile.active-purple { background: var(--ats-purple); box-shadow: 0 0 6px var(--ats-purple); }
+    .matrix-tile.active-cyan { background: var(--ats-cyan); box-shadow: 0 0 6px var(--ats-cyan); }
+
+    .modal-backdrop {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); z-index: 100;
+      display: none; align-items: center; justify-content: center;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-dialog {
+      background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px;
+      width: 92%; max-width: 800px; padding: 22px; box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+    .modal-header h2 { font-size: 0.95rem; font-weight: 800; color: var(--ats-blue); display: flex; align-items: center; gap: 8px; }
+    .modal-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; }
+    .tab-btn {
+      background: transparent; border: none; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700;
+      color: var(--text-muted); cursor: pointer; padding: 4px 10px; border-radius: 4px;
+    }
+    .tab-btn.active { background: var(--ats-blue); color: #fff; }
+    .code-box {
+      background: #0f172a; color: #38bdf8; padding: 12px; border-radius: 6px;
+      font-family: var(--font-mono); font-size: 0.72rem; line-height: 1.45; overflow-x: auto; white-space: pre;
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <header>
+    <div class="top-left-title">
+      <div class="sub-brand"><span>◈ ATSMATRIX</span><span>//</span><span>RESEARCH COLLISION ENGINE</span></div>
+      <div class="main-claim">500+ agents. Sources collide. Truth survives.</div>
+      <div class="live-badge"><span class="live-dot"></span><span>HIGH-FREQUENCY GRAPH-NATIVE RUNTIME // ANYEL1TO EDITION</span></div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-gemini" onclick="toggleChatDrawer()"><span>✨</span> CHAT WITH GEMINI</button>
+      <button class="btn btn-primary" onclick="openConnectModal()"><span>⚡</span> CONNECT YOUR AI</button>
+      <button class="btn" onclick="boostSpeed()"><span>🚀</span> <span id="speed-btn-txt">BOOST: 2X</span></button>
+      <button class="btn" onclick="resetEngine()"><span>↺</span> RESET</button>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Theme">🌓</button>
+    </div>
+  </header>
+
+  <div class="viewport-container">
+    <canvas id="graph-canvas"></canvas>
+    <div class="live-trigger-bar">
+      <span style="font-size:0.65rem; color:var(--ats-blue); font-weight:800;">⚡ SEND AGENT EVENT:</span>
+      <input type="text" id="quick-msg-input" class="trigger-input" placeholder="Type prompt or action..." value="revenue contradiction detected" />
+      <button class="trigger-btn" onclick="triggerQuickEvent()">FIRE NOW</button>
+    </div>
+
+    <div id="chat-drawer" class="chat-drawer">
+      <div class="chat-header">
+        <h3><span>✨</span> ATSMATRIX // GEMINI LLM AGENT</h3>
+        <button class="theme-toggle" onclick="toggleChatDrawer()">✕</button>
+      </div>
+      <div class="api-key-bar">
+        <span>KEY:</span>
+        <input type="password" id="gemini-key-input" class="api-key-input" placeholder="Enter Gemini API Key (or leave empty for Demo)" />
+        <button class="btn" style="padding:2px 6px; font-size:0.6rem;" onclick="saveGeminiKey()">SAVE</button>
+      </div>
+      <div id="chat-messages" class="chat-messages">
+        <div class="msg msg-bot">
+          Hello! I am your <b>ATSMATRIX Gemini Agent</b>. Ask me to research a topic, debug code, or solve a problem. Watch the 500+ agent collision graph fire in real-time as I think!
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="chat-user-input" class="chat-txt" placeholder="Ask Gemini something..." onkeydown="if(event.key==='Enter') sendGeminiQuery()" />
+        <button class="btn btn-primary" onclick="sendGeminiQuery()">SEND</button>
+      </div>
+    </div>
+
+    <div id="badge-1" class="collision-tag tag-confirmed" style="top: 16%; left: 46%;">CONFIRMED 4/4</div>
+    <div id="badge-2" class="collision-tag tag-merged" style="top: 30%; left: 22%;">SOURCE MERGED</div>
+    <div id="badge-3" class="collision-tag tag-collision" style="top: 14%; left: 72%;">ENTITY COLLISION</div>
+    <div id="badge-4" class="collision-tag tag-verified" style="top: 70%; left: 54%;">TRACE VERIFIED</div>
+  </div>
+
+  <div class="bottom-hud">
+    <div class="pipeline-row">
+      <div class="pipeline-label">RESEARCH PHASE PIPELINE</div>
+      <div class="pipeline-steps">
+        <div id="pipe-1" class="step-box active"><div class="step-num">01</div><div class="step-name">COLLECT</div><div class="step-indicator"></div></div>
+        <div id="pipe-2" class="step-box"><div class="step-num">02</div><div class="step-name">MATCH</div><div class="step-indicator"></div></div>
+        <div id="pipe-3" class="step-box"><div class="step-num">03</div><div class="step-name">CROSS-LINK</div><div class="step-indicator"></div></div>
+        <div id="pipe-4" class="step-box"><div class="step-num">04</div><div class="step-name">VERIFY</div><div class="step-indicator"></div></div>
+        <div id="pipe-5" class="step-box"><div class="step-num">05</div><div class="step-name">SYNTH</div><div class="step-indicator"></div></div>
+      </div>
+    </div>
+
+    <div class="hud-grid">
+      <div class="activity-stream-wrap">
+        <div class="stream-header"><span>GRAPH ACTIVITY LOG</span><span id="rate-counter" style="color:var(--ats-blue); font-size:0.58rem;">2,450 MSG/S ●</span></div>
+        <div id="stream-feed-box" class="stream-feed"></div>
+      </div>
+      <div class="stats-table">
+        <div class="stat-unit"><span id="stat-nodes" class="stat-val">520</span><span class="stat-title">AGENTS</span></div>
+        <div class="stat-unit"><span id="stat-edges" class="stat-val">2,840</span><span class="stat-title">EDGES</span></div>
+        <div class="stat-unit"><span id="stat-photons" class="stat-val">180</span><span class="stat-title">PHOTONS</span></div>
+        <div class="stat-unit"><span class="stat-val">4</span><span class="stat-title">CLUST</span></div>
+        <div class="stat-unit"><span id="stat-latency" class="stat-val">0.8ms</span><span class="stat-title">LATENCY</span></div>
+      </div>
+      <div class="matrix-wall-wrap">
+        <div class="matrix-wall-header">EVIDENCE WALL // REAL-TIME SOURCE STATUS</div>
+        <div id="matrix-tiles-box" class="matrix-tiles"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="connect-modal" class="modal-backdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2><span>⚡</span> Connect Your AI to ATSMATRIX Visualizer</h2>
+        <button class="theme-toggle" onclick="closeConnectModal()">✕</button>
+      </div>
+      <div class="modal-tabs">
+        <button class="tab-btn active" onclick="showTab('python')">Python (LangGraph / CrewAI)</button>
+        <button class="tab-btn" onclick="showTab('curl')">cURL / REST Webhook</button>
+        <button class="tab-btn" onclick="showTab('js')">JavaScript / TypeScript</button>
+      </div>
+      <div id="tab-python" class="tab-content">
+        <div class="code-box">import requests
+
+ATSMATRIX_ENDPOINT = "https://anyel1to.github.io/atsmatrix-agent-visualizeR--ANYEL1TO/api/event"
+
+def emit_step(agent_id, action, message, cluster="VERIFY"):
+    requests.post(ATSMATRIX_ENDPOINT, json={
+        "agent_id": agent_id,
+        "action": action,       # "LINK", "VERIFY", "MATCH", "FLAG", "SYNC", "FOUND"
+        "cluster": cluster,     # "COLLECT", "MATCH", "CROSS-LINK", "VERIFY", "SYNTH"
+        "message": message
+    })
+
+# In your agent loop:
+emit_step("agent_501", "VERIFY", "Cross-verified citation tree with cluster #2")
+emit_step("agent_501", "LINK", "Supplier dependency bridge created")</div>
+      </div>
+      <div id="tab-curl" class="tab-content" style="display:none;">
+        <div class="code-box">curl -X POST https://anyel1to.github.io/atsmatrix-agent-visualizeR--ANYEL1TO/api/event \
+  -H "Content-Type: application/json" \
+  -d '{"agent_id":"bot_01","cluster":"VERIFY","action":"FLAG","message":"revenue anomaly found"}'</div>
+      </div>
+      <div id="tab-js" class="tab-content" style="display:none;">
+        <div class="code-box">await fetch('https://anyel1to.github.io/atsmatrix-agent-visualizeR--ANYEL1TO/api/event', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ agent_id: 'agent_300', action: 'MATCH', message: 'citation lineage confirmed' })
+});</div>
+      </div>
+      <div style="display:flex; justify-content:flex-end;"><button class="btn btn-primary" onclick="closeConnectModal()">Done</button></div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('graph-canvas'), ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth, height = canvas.height = window.innerHeight - 160;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight - 160;
+    });
+
+    function toggleTheme() {
+      const b = document.body;
+      b.setAttribute('data-theme', b.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+
+    function openConnectModal() { document.getElementById('connect-modal').classList.add('open'); }
+    function closeConnectModal() { document.getElementById('connect-modal').classList.remove('open'); }
+    function showTab(name) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.modal-tabs .tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + name).style.display = 'block';
+      event.target.classList.add('active');
+    }
+
+    function toggleChatDrawer() {
+      const drawer = document.getElementById('chat-drawer');
+      drawer.classList.toggle('open');
+      if (drawer.classList.contains('open')) {
+        document.getElementById('gemini-key-input').value = localStorage.getItem('ats_gemini_key') || '';
+        document.getElementById('chat-user-input').focus();
+      }
+    }
+
+    function saveGeminiKey() {
+      const key = document.getElementById('gemini-key-input').value.trim();
+      localStorage.setItem('ats_gemini_key', key);
+      alert('Gemini API Key Saved Locally!');
+    }
+
+    async function sendGeminiQuery() {
+      const input = document.getElementById('chat-user-input');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+
+      const msgBox = document.getElementById('chat-messages');
+      const userDiv = document.createElement('div');
+      userDiv.className = 'msg msg-user';
+      userDiv.textContent = text;
+      msgBox.appendChild(userDiv);
+      msgBox.scrollTop = msgBox.scrollHeight;
+
+      pushLiveEvent('GEMINI_INGEST', `Objective received: "${text.substring(0, 32)}..."`);
+      for (let k = 0; k < 20; k++) spawnPhoton();
+
+      const botDiv = document.createElement('div');
+      botDiv.className = 'msg msg-bot';
+      botDiv.innerHTML = `<div class="msg-thought">⚡ Gemini is activating research clusters...</div>`;
+      msgBox.appendChild(botDiv);
+      msgBox.scrollTop = msgBox.scrollHeight;
+
+      const apiKey = localStorage.getItem('ats_gemini_key') || document.getElementById('gemini-key-input').value.trim();
+
+      if (!apiKey) {
+        setTimeout(() => {
+          pushLiveEvent('PLAN', 'Decomposing objective into citation verification DAG');
+          for (let k = 0; k < 12; k++) spawnPhoton();
+        }, 400);
+
+        setTimeout(() => {
+          pushLiveEvent('MATCH', 'Matching entity embeddings across 4 independent sources');
+          for (let k = 0; k < 15; k++) spawnPhoton();
+        }, 900);
+
+        setTimeout(() => {
+          pushLiveEvent('VERIFY', 'Synthesizing verified consensus output');
+          for (let k = 0; k < 25; k++) spawnPhoton();
+          botDiv.innerHTML = `<b>ATSMATRIX Gemini Agent:</b> Processed objective for <i>"${text}"</i>.<br><br>• Analyzed 520 neural agent nodes across 4 clusters.<br>• Verified 18 cross-links with 0 contradictions.<br>• Consensus reached with 98.4% confidence rating.`;
+          msgBox.scrollTop = msgBox.scrollHeight;
+        }, 1600);
+        return;
+      }
+
+      try {
+        pushLiveEvent('GEMINI_REASON', 'Streaming neural weights from Google Gemini API');
+        for (let k = 0; k < 18; k++) spawnPhoton();
+
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `You are the ATSMATRIX Autonomous Agent core. Answer clearly and concisely: ${text}` }] }]
+          })
+        });
+        const data = await res.json();
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Response received from Gemini.";
+        
+        pushLiveEvent('SYNTH', 'Gemini consensus verified and formatted');
+        for (let k = 0; k < 30; k++) spawnPhoton();
+        
+        botDiv.innerHTML = `<b>Gemini Agent:</b> ${reply.replace(/\\n/g, '<br>')}`;
+        msgBox.scrollTop = msgBox.scrollHeight;
+      } catch (err) {
+        botDiv.innerHTML = `<span style="color:var(--ats-magenta);">Error calling Gemini: ${err.message}</span>`;
+      }
+    }
+
+    const tilesBox = document.getElementById('matrix-tiles-box'), tileEls = [];
+    for (let i = 0; i < 112; i++) {
+      const t = document.createElement('div');
+      t.className = 'matrix-tile';
+      tilesBox.appendChild(t);
+      tileEls.push(t);
+    }
+
+    function flashRandomTiles() {
+      for (let k = 0; k < 3; k++) {
+        const idx = Math.floor(Math.random() * tileEls.length);
+        const colors = ['active-pink', 'active-blue', 'active-purple', 'active-cyan'];
+        const cls = colors[Math.floor(Math.random() * colors.length)];
+        tileEls[idx].className = 'matrix-tile ' + cls;
+        setTimeout(() => { tileEls[idx].className = 'matrix-tile'; }, 800 + Math.random() * 600);
+      }
+    }
+
+    const CLUSTERS = [
+      { id: 0, name: 'DISCOVERY', cx: 0.28, cy: 0.65, color: '#0284c7', count: 135 },
+      { id: 1, name: 'VERIFICATION', cx: 0.72, cy: 0.32, color: '#e11d48', count: 140 },
+      { id: 2, name: 'REASONING', cx: 0.35, cy: 0.24, color: '#7c3aed', count: 125 },
+      { id: 3, name: 'SYNTHESIS', cx: 0.80, cy: 0.68, color: '#06b6d4', count: 120 }
+    ];
+
+    const nodes = [], edges = [], photons = [], radarPings = [];
+
+    CLUSTERS.forEach(c => {
+      for (let i = 0; i < c.count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const rad = Math.random() * 150 + 15;
+        const isHub = i < 6;
+        nodes.push({
+          id: `agent_${nodes.length}`, cluster: c.id, color: c.color,
+          x: width * c.cx + Math.cos(angle) * rad, y: height * c.cy + Math.sin(angle) * rad,
+          baseX: width * c.cx + Math.cos(angle) * rad, baseY: height * c.cy + Math.sin(angle) * rad,
+          vx: (Math.random() - 0.5) * 1.5, vy: (Math.random() - 0.5) * 1.5,
+          r: isHub ? Math.random() * 2 + 4.5 : Math.random() * 1.8 + 1.8,
+          isHub: isHub, orbitAngle: Math.random() * Math.PI * 2, orbitSpeed: (Math.random() - 0.5) * 0.02
+        });
+      }
+    });
+
+    nodes.forEach((n1, i) => {
+      nodes.forEach((n2, j) => {
+        if (i < j) {
+          const dx = n1.x - n2.x, dy = n1.y - n2.y, dist = Math.sqrt(dx*dx + dy*dy);
+          if (n1.cluster === n2.cluster && dist < 85 && Math.random() > 0.45) {
+            edges.push({ from: n1, to: n2, color: n1.color, alpha: 0.22 });
+          } else if (n1.cluster !== n2.cluster && (n1.isHub || n2.isHub) && dist < 320 && Math.random() > 0.82) {
+            edges.push({ from: n1, to: n2, color: '#64748b', alpha: 0.16, isCross: true });
+          }
+        }
+      });
+    });
+
+    document.getElementById('stat-nodes').textContent = nodes.length;
+    document.getElementById('stat-edges').textContent = edges.length.toLocaleString();
+
+    function spawnPhoton() {
+      if (edges.length === 0) return;
+      const randEdge = edges[Math.floor(Math.random() * edges.length)];
+      photons.push({
+        edge: randEdge, progress: 0, speed: Math.random() * 0.035 + 0.02,
+        color: randEdge.isCross ? '#06b6d4' : randEdge.color, size: randEdge.isCross ? 3.5 : 2.4
+      });
+      if (photons.length > 220) photons.shift();
+    }
+
+    const EVENT_ITEMS = [
+      { tag: 'LINK', msg: 'supplier bridge surfaced', tagCls: 'tag-link', pipe: 3 },
+      { tag: 'VERIFY', msg: '4 independent sources verified', tagCls: 'tag-verify', pipe: 4 },
+      { tag: 'MATCH', msg: 'claim_082 -> fllog_17 mapped', tagCls: 'tag-match', pipe: 2 },
+      { tag: 'FLAG', msg: 'revenue contradiction detected', tagCls: 'tag-flag', pipe: 4 },
+      { tag: 'SYNC', msg: 'wallet cluster committed', tagCls: 'tag-sync', pipe: 1 },
+      { tag: 'NOTICE', msg: 'entity cluster #3 collision', tagCls: 'tag-match', pipe: 2 },
+      { tag: 'TRACE', msg: 'origin resolved -> source_014', tagCls: 'tag-link', pipe: 3 },
+      { tag: 'FOUND', msg: 'hidden dependency hub discovered', tagCls: 'tag-sync', pipe: 1 },
+      { tag: 'COLLIDE', msg: 'cross-cluster citation resolved', tagCls: 'tag-verify', pipe: 5 }
+    ];
+
+    let speedMultiplier = 1;
+    function boostSpeed() {
+      speedMultiplier = speedMultiplier === 1 ? 2 : 1;
+      document.getElementById('speed-btn-txt').textContent = `BOOST: ${speedMultiplier}X`;
+    }
+
+    function pushLiveEvent(customTag, customMsg) {
+      const feed = document.getElementById('stream-feed-box');
+      const timeStr = new Date().toTimeString().split(' ')[0];
+      const ev = customTag 
+        ? { tag: customTag, msg: customMsg, tagCls: 'tag-flag', pipe: 4 }
+        : EVENT_ITEMS[Math.floor(Math.random() * EVENT_ITEMS.length)];
+
+      const row = document.createElement('div');
+      row.className = 'stream-row';
+      row.innerHTML = `<span class="stream-time">${timeStr}</span><span class="stream-tag ${ev.tagCls}">${ev.tag}</span><span class="stream-msg">${ev.msg}</span>`;
+      feed.prepend(row);
+      if (feed.children.length > 18) feed.removeChild(feed.lastChild);
+
+      document.querySelectorAll('.step-box').forEach((s, idx) => s.classList.toggle('active', idx + 1 === ev.pipe));
+      flashRandomTiles();
+
+      const hubs = nodes.filter(n => n.isHub);
+      const randHub = hubs[Math.floor(Math.random() * hubs.length)];
+      if (randHub) {
+        radarPings.push({ x: randHub.x, y: randHub.y, r: 5, maxR: 70, alpha: 0.9, color: randHub.color });
+      }
+    }
+
+    function triggerQuickEvent() {
+      const input = document.getElementById('quick-msg-input');
+      const val = input.value.trim() || 'agent message dispatched';
+      pushLiveEvent('EVENT', val);
+      for (let k = 0; k < 12; k++) spawnPhoton();
+    }
+
+    setInterval(() => {
+      pushLiveEvent();
+      for (let k = 0; k < 6 * speedMultiplier; k++) spawnPhoton();
+    }, 160);
+
+    function resetEngine() {
+      photons.length = 0; radarPings.length = 0;
+      document.getElementById('stream-feed-box').innerHTML = '';
+      pushLiveEvent();
+    }
+
+    let isDragging = false, dragCluster = null;
+    canvas.addEventListener('mousedown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      CLUSTERS.forEach(c => {
+        const cx = width * c.cx, cy = height * c.cy;
+        if (Math.sqrt((mx - cx)**2 + (my - cy)**2) < 140) {
+          isDragging = true; dragCluster = c;
+        }
+      });
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isDragging && dragCluster) {
+        const rect = canvas.getBoundingClientRect();
+        dragCluster.cx = (e.clientX - rect.left) / width;
+        dragCluster.cy = (e.clientY - rect.top) / height;
+      }
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; dragCluster = null; });
+
+    let frameCount = 0;
+    function renderLoop() {
+      ctx.clearRect(0, 0, width, height);
+      frameCount++;
+
+      nodes.forEach(n => {
+        n.orbitAngle += n.orbitSpeed * speedMultiplier;
+        const c = CLUSTERS[n.cluster];
+        n.vx += (width * c.cx - n.x) * 0.0006 * speedMultiplier;
+        n.vy += (height * c.cy - n.y) * 0.0006 * speedMultiplier;
+        n.vx += Math.cos(n.orbitAngle) * 0.15 * speedMultiplier;
+        n.vy += Math.sin(n.orbitAngle) * 0.15 * speedMultiplier;
+        n.x += n.vx * speedMultiplier;
+        n.y += n.vy * speedMultiplier;
+        n.vx *= 0.96; n.vy *= 0.96;
+      });
+
+      edges.forEach(e => {
+        ctx.beginPath();
+        ctx.moveTo(e.from.x, e.from.y);
+        ctx.lineTo(e.to.x, e.to.y);
+        ctx.strokeStyle = e.color;
+        ctx.lineWidth = e.isCross ? 0.9 : 0.65;
+        ctx.globalAlpha = e.alpha;
+        ctx.stroke();
+      });
+
+      for (let i = photons.length - 1; i >= 0; i--) {
+        const p = photons[i];
+        p.progress += p.speed * speedMultiplier;
+        if (p.progress >= 1) { photons.splice(i, 1); continue; }
+        const px = p.edge.from.x + (p.edge.to.x - p.edge.from.x) * p.progress;
+        const py = p.edge.from.y + (p.edge.to.y - p.edge.from.y) * p.progress;
+        ctx.beginPath();
+        ctx.arc(px, py, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = 0.95;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      for (let i = radarPings.length - 1; i >= 0; i--) {
+        const ping = radarPings[i];
+        ping.r += 1.2 * speedMultiplier;
+        ping.alpha -= 0.018 * speedMultiplier;
+        if (ping.alpha <= 0 || ping.r >= ping.maxR) { radarPings.splice(i, 1); continue; }
+        ctx.beginPath();
+        ctx.arc(ping.x, ping.y, ping.r, 0, Math.PI * 2);
+        ctx.strokeStyle = ping.color;
+        ctx.lineWidth = 1.2;
+        ctx.globalAlpha = ping.alpha;
+        ctx.stroke();
+      }
+
+      ctx.globalAlpha = 1.0;
+      nodes.forEach(n => {
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fillStyle = n.color;
+        ctx.fill();
+        if (n.isHub) {
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.r + 3.5, 0, Math.PI * 2);
+          ctx.strokeStyle = n.color;
+          ctx.lineWidth = 1.4;
+          ctx.globalAlpha = 0.65;
+          ctx.stroke();
+          ctx.globalAlpha = 1.0;
+        }
+      });
+
+      if (frameCount % 15 === 0) {
+        document.getElementById('stat-photons').textContent = photons.length;
+      }
+      requestAnimationFrame(renderLoop);
+    }
+    renderLoop();
+  </script>
+</body>
+</html>
