@@ -1,0 +1,3 @@
+# Reclassify single-file high-performance engines as JavaScript
+# (most of the code is vanilla JS canvas + WebGL logic inside the HTML)
+*.html linguist-language=JavaScript
