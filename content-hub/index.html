@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Content Hub 18+</title>
+<style>
+  body { margin:0; background:#000; color:#ffb060; font: 13px Arial, Helvetica, sans-serif; }
+  a { color:#ff9a3c; text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  a:visited { color:#cc6a22; }
+  #top { background:#1a0d00; border-bottom:2px solid #ff6a1a; padding:6px 10px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  #top b { color:#ff6a1a; font-size:18px; letter-spacing:0; }
+  #top .sp { margin-left:auto; }
+  button, input, textarea, select { font: 13px Arial, Helvetica, sans-serif; }
+  input, textarea { background:#000; color:#ffb000; border:2px inset #666; padding:4px; }
+  button, input[type=submit] { background:#2a1608; color:#ffb000; border:2px outset #ff6a1a; padding:3px 8px; }
+  #wrap { display:flex; gap:12px; align-items:flex-start; padding:10px; max-width:980px; margin:0 auto; }
+  #feed { flex:1; min-width:0; }
+  #side { width:250px; background:#140c06; border:1px solid #ff6a1a; padding:8px; }
+  .post { display:flex; gap:8px; background:#120c08; border:1px solid #3a2414; padding:6px; margin:0 0 6px; }
+  .votes { width:36px; text-align:center; color:#ff6a1a; font-weight:bold; }
+  .votes a { display:block; color:#ff6a1a; font-size:14px; }
+  .tag { color:#aa7744; font-size:11px; }
+  .title { font-size:16px; color:#ffb000; }
+  .body { white-space:pre-wrap; color:#ffd2a0; margin:8px 0; }
+  img.pic, video.vid { max-width:100%; background:#000; border:1px solid #ff6a1a; }
+  .err { color:#ffb4a8; }
+  .blink { animation: bk 1s step-end infinite; color:#ffe14a; }
+  .badge { display:inline-block; border:2px solid #ff6a1a; color:#ff6a1a; font-weight:bold; padding:1px 6px; letter-spacing:1px; }
+  .gate { min-height:46vh; display:flex; align-items:center; justify-content:center; text-align:center; }
+  .sign { border:4px ridge #ff6a1a; background:#1a0d00; padding:22px 16px; max-width:460px; }
+  .sign h2 { margin:8px 0; color:#ffb000; font-size:28px; line-height:1.15; }
+  .sign p { font-size:16px; color:#ffd2a0; }
+  @keyframes bk { 50% { opacity:0; } }
+  @media (max-width:700px) { #wrap { display:block; } #side { width:auto; margin-top:10px; } }
+</style>
+</head>
+<body>
+<div id="top">
+  <b>content hub</b> <span class='badge'>18+</span>
+  <a href="#" id="hot">hot</a>
+  <a href="#" id="new">new</a>
+  <span class="sp" id="who"></span>
+</div>
+<div id="wrap">
+  <div id="feed"></div>
+  <div id="side">
+    <b>about</b>
+    <p><span class='badge'>18+</span> Adults only. Forum for text, pics, and vids. Log in or create an account to view content. Only admin can post.</p>
+    <p class="blink">under construction</p>
+    <p class="tag">visitor #<span id="hits">000001</span></p>
+    <hr color="#ff6a1a">
+    <div id="sidebox"></div>
+  </div>
+</div>
+<script>
+var FEED = "hub.posts.v2";
+var USERS = "hub.users.v2";
+var SES = "hub.user.v2";
+var ADMIN = "hub.admin.v2";
+var ASES = "hub.ases.v2";
+var HITS = "hub.hits.v2";
+var sort = "new";
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, function (c) {
+    return { "&": "\u0026amp;", "<": "\u0026lt;", ">": "\u0026gt;", "\"": "\u0026quot;" }[c];
+  });
+}
+function load(k, fb) { try { return JSON.parse(localStorage.getItem(k) || fb); } catch (e) { return JSON.parse(fb); } }
+function save(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+function hash(s) { var h = 2166136261; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(16); }
+function me() { return sessionStorage.getItem(SES) || ""; }
+function isAdmin() { return sessionStorage.getItem(ASES) === "1"; }
+function posts() { return load(FEED, "[]"); }
+function users() { return load(USERS, "[]"); }
+
+function bump() {
+  var n = Number(localStorage.getItem(HITS) || "0") + 1;
+  localStorage.setItem(HITS, String(n));
+  document.getElementById("hits").textContent = String(n).padStart(6, "0");
+}
+function bar() {
+  var w = document.getElementById("who");
+  if (isAdmin()) w.innerHTML = "admin &nbsp;<a href='#' id='logout'>logout</a>";
+  else if (me()) w.innerHTML = esc(me()) + " &nbsp;<a href='#' id='logout'>logout</a>";
+  else w.innerHTML = "<a href='#' id='login'>log in</a> &nbsp;<a href='#' id='signup'>sign up</a> &nbsp;<a href='#' id='admin'>admin</a>";
+  var out = document.getElementById("logout");
+  if (out) out.onclick = function (e) { e.preventDefault(); sessionStorage.removeItem(SES); sessionStorage.removeItem(ASES); draw(); };
+  var lg = document.getElementById("login"); if (lg) lg.onclick = function (e) { e.preventDefault(); authBox("login"); };
+  var su = document.getElementById("signup"); if (su) su.onclick = function (e) { e.preventDefault(); authBox("signup"); };
+  var ad = document.getElementById("admin"); if (ad) ad.onclick = function (e) { e.preventDefault(); adminGate(); };
+}
+function side() {
+  var box = document.getElementById("sidebox");
+  if (isAdmin()) box.innerHTML = "<b>submit</b><br>you are admin.<br><a href='#' id='compose'>new post</a>";
+  else box.innerHTML = "<b>rules</b><br>1. accounts are for looking<br>2. no posting unless admin<br>3. text, pics, vids only";
+  var c = document.getElementById("compose");
+  if (c) c.onclick = function (e) { e.preventDefault(); compose(); };
+}
+function gate() {
+  document.getElementById("feed").innerHTML = "<div class='gate'><div class='sign'><div class='badge'>18+</div><h2>LOG IN OR CREATE AN ACCOUNT TO VIEW CONTENT</h2><p>This board is 18+ only. Text, pics, and vids stay hidden until you log in or sign up.</p><p><a href='#' id='glogin'>log in</a> &nbsp; <a href='#' id='gsign'>create account</a></p></div></div>";
+  document.getElementById("glogin").onclick = function (e) { e.preventDefault(); authBox("login"); };
+  document.getElementById("gsign").onclick = function (e) { e.preventDefault(); authBox("signup"); };
+}
+function list() {
+  if (!me() && !isAdmin()) { gate(); return; }
+  var items = posts().slice();
+  if (sort === "hot") items.sort(function (a, b) { return (b.votes || 0) - (a.votes || 0); });
+  else items.sort(function (a, b) { return b.at - a.at; });
+  if (!items.length) { document.getElementById("feed").innerHTML = "<p>no posts yet.</p>"; return; }
+  var html = "";
+  for (var i = 0; i < items.length; i++) {
+    var p = items[i];
+    html += "<div class='post'><div class='votes'><a href='#' data-up='" + esc(p.id) + "'>&#9650;</a>" + (p.votes || 0) + "<a href='#' data-dn='" + esc(p.id) + "'>&#9660;</a></div><div><a class='title' href='#' data-open='" + esc(p.id) + "'>" + esc(p.title || "untitled") + "</a><br><span class='tag'>18+ posted by admin · " + new Date(p.at).toLocaleString() + " · " + (p.kind || "text") + "</span></div></div>";
+  }
+  document.getElementById("feed").innerHTML = html;
+  bindList();
+}
+function bindList() {
+  var ups = document.querySelectorAll("[data-up]");
+  for (var i = 0; i < ups.length; i++) ups[i].onclick = vote;
+  var dns = document.querySelectorAll("[data-dn]");
+  for (var j = 0; j < dns.length; j++) dns[j].onclick = vote;
+  var opens = document.querySelectorAll("[data-open]");
+  for (var k = 0; k < opens.length; k++) opens[k].onclick = function (e) { e.preventDefault(); openPost(this.getAttribute("data-open")); };
+}
+function vote(e) {
+  e.preventDefault();
+  if (!me() && !isAdmin()) { authBox("login"); return; }
+  var id = this.getAttribute("data-up") || this.getAttribute("data-dn");
+  var dir = this.getAttribute("data-up") ? 1 : -1;
+  var all = posts();
+  for (var i = 0; i < all.length; i++) if (all[i].id === id) all[i].votes = (all[i].votes || 0) + dir;
+  save(FEED, all);
+  list();
+}
+function openPost(id) {
+  if (!me() && !isAdmin()) { authBox("login"); return; }
+  var p = null, all = posts();
+  for (var i = 0; i < all.length; i++) if (all[i].id === id) p = all[i];
+  if (!p) return;
+  var media = "";
+  if (p.image && String(p.image).indexOf("data:image/") === 0) media = "<img class='pic' src='" + p.image + "'>";
+  if (p.video && String(p.video).indexOf("data:video/") === 0) media = "<video class='vid' controls src='" + p.video + "'></video>";
+  document.getElementById("feed").innerHTML = "<a href='#' id='back'>back</a><h2>" + esc(p.title || "untitled") + "</h2><span class='tag'>18+ posted by admin · " + new Date(p.at).toLocaleString() + "</span><div class='body'>" + esc(p.body || "") + "</div><div id='media'>" + media + "</div>" + (isAdmin() ? "<p><a href='#' id='del'>delete</a></p>" : "<p class='tag'>comments locked. this account can only look.</p>");
+  if (p.media) {
+    getMedia(p.media).then(function (blob) {
+      if (!blob) return;
+      var url = URL.createObjectURL(blob);
+      var box = document.getElementById("media");
+      if (!box) return;
+      box.innerHTML = p.kind === "vid" ? "<video class='vid' controls src='" + url + "'></video>" : "<img class='pic' src='" + url + "'>";
+    });
+  }
+  document.getElementById("back").onclick = function (e) { e.preventDefault(); list(); };
+  var del = document.getElementById("del");
+  if (del) del.onclick = function (e) {
+    e.preventDefault();
+    if (p.media) delMedia(p.media);
+    save(FEED, posts().filter(function (x) { return x.id !== id; }));
+    list();
+  };
+}
+function authBox(mode) {
+  document.getElementById("feed").innerHTML = "<div class='badge'>18+</div><h2>" + (mode === "signup" ? "create account" : "log in") + "</h2><p class='tag'>accounts can see text, pics, and vids. they cannot post.</p><form id='f'>username<br><input id='user' size='24'><br><br>password<br><input id='pw' type='password' size='24'><br><br><input type='submit' value='" + (mode === "signup" ? "sign up" : "log in") + "'></form><p class='err' id='err'></p>";
+  document.getElementById("f").onsubmit = function (e) {
+    e.preventDefault();
+    var name = document.getElementById("user").value.trim();
+    var pw = document.getElementById("pw").value;
+    if (name.length < 3 || pw.length < 4) { document.getElementById("err").textContent = "username 3+, password 4+."; return; }
+    var listU = users();
+    if (mode === "signup") {
+      for (var i = 0; i < listU.length; i++) if (listU[i].name.toLowerCase() === name.toLowerCase()) { document.getElementById("err").textContent = "name taken on this browser."; return; }
+      listU.push({ name: name, hash: hash(name + ":" + pw), role: "viewer" });
+      save(USERS, listU);
+      sessionStorage.setItem(SES, name);
+    } else {
+      var ok = false;
+      for (var j = 0; j < listU.length; j++) if (listU[j].name.toLowerCase() === name.toLowerCase() && listU[j].hash === hash(name + ":" + pw)) ok = true;
+      if (!ok) { document.getElementById("err").textContent = "no match."; return; }
+      sessionStorage.setItem(SES, name);
+    }
+    draw();
+  };
+}
+function adminGate() {
+  if (!localStorage.getItem(ADMIN)) {
+    document.getElementById("feed").innerHTML = "<h2>create admin</h2><p class='tag'>only admin can post.</p><form id='f'>password<br><input id='pw' type='password'><br><br>confirm<br><input id='pw2' type='password'><br><br><input type='submit' value='create'></form><p class='err' id='err'></p>";
+    document.getElementById("f").onsubmit = function (e) {
+      e.preventDefault();
+      var a = document.getElementById("pw").value, b = document.getElementById("pw2").value;
+      if (a.length < 4 || a !== b) { document.getElementById("err").textContent = "mismatch or too short."; return; }
+      localStorage.setItem(ADMIN, hash("admin:" + a));
+      sessionStorage.setItem(ASES, "1");
+      draw();
+    };
+    return;
+  }
+  document.getElementById("feed").innerHTML = "<h2>admin</h2><form id='f'>password<br><input id='pw' type='password'><br><br><input type='submit' value='enter'></form><p class='err' id='err'></p>";
+  document.getElementById("f").onsubmit = function (e) {
+    e.preventDefault();
+    if (hash("admin:" + document.getElementById("pw").value) !== localStorage.getItem(ADMIN)) { document.getElementById("err").textContent = "wrong password."; return; }
+    sessionStorage.setItem(ASES, "1");
+    draw();
+  };
+}
+function db() {
+  return new Promise(function (ok, bad) {
+    var req = indexedDB.open("hub-media", 1);
+    req.onupgradeneeded = function () { req.result.createObjectStore("files"); };
+    req.onsuccess = function () { ok(req.result); };
+    req.onerror = function () { bad(req.error); };
+  });
+}
+function putMedia(id, blob) {
+  return db().then(function (d) {
+    return new Promise(function (ok, bad) {
+      var tx = d.transaction("files", "readwrite");
+      tx.objectStore("files").put(blob, id);
+      tx.oncomplete = function () { ok(); };
+      tx.onerror = function () { bad(tx.error); };
+    });
+  });
+}
+function getMedia(id) {
+  return db().then(function (d) {
+    return new Promise(function (ok, bad) {
+      var rq = d.transaction("files").objectStore("files").get(id);
+      rq.onsuccess = function () { ok(rq.result || null); };
+      rq.onerror = function () { bad(rq.error); };
+    });
+  });
+}
+function delMedia(id) {
+  return db().then(function (d) {
+    return new Promise(function (ok) {
+      var tx = d.transaction("files", "readwrite");
+      tx.objectStore("files").delete(id);
+      tx.oncomplete = function () { ok(); };
+      tx.onerror = function () { ok(); };
+    });
+  });
+}
+function compose() {
+  document.getElementById("feed").innerHTML = "<h2>new post</h2><form id='f'>title<br><input id='title' size='42'><br><br>text<br><textarea id='body' rows='6' cols='42'></textarea><br><br>pic or vid, up to 80MB<br><input id='file' type='file' accept='image/*,video/*'><br><br><input type='submit' value='publish'></form><p class='err' id='err'></p>";
+  document.getElementById("f").onsubmit = function (e) {
+    e.preventDefault();
+    var title = document.getElementById("title").value.trim();
+    var body = document.getElementById("body").value;
+    var file = document.getElementById("file").files[0];
+    var err = document.getElementById("err");
+    if (!title) { err.textContent = "title required."; return; }
+    if (!file) return add({ title: title, body: body, image: "", video: "", kind: "text" });
+    if (file.size > 80 * 1024 * 1024) { err.textContent = "keep it under 80MB."; return; }
+    err.textContent = "saving video...";
+    var id = String(Date.now());
+    var kind = file.type.indexOf("video/") === 0 ? "vid" : "pic";
+    putMedia(id, file).then(function () {
+      add({ id: id, title: title, body: body, image: "", video: "", media: id, kind: kind });
+    }).catch(function () {
+      err.textContent = "the phone refused that file. try a smaller one.";
+    });
+  };
+}
+function add(p) {
+  var all = posts();
+  if (!p.id) p.id = String(Date.now());
+  p.at = Date.now();
+  p.votes = 1;
+  all.unshift(p);
+  save(FEED, all);
+  sort = "new";
+  list();
+  var note = document.createElement("p");
+  note.className = "tag";
+  note.textContent = "published. it is on the board.";
+  document.getElementById("feed").insertBefore(note, document.getElementById("feed").firstChild);
+}
+function draw() { bar(); side(); list(); }
+document.getElementById("hot").onclick = function (e) { e.preventDefault(); sort = "hot"; list(); };
+document.getElementById("new").onclick = function (e) { e.preventDefault(); sort = "new"; list(); };
+bump();
+draw();
+</script>
+</body>
+</html>
